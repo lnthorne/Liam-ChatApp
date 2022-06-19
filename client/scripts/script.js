@@ -28,14 +28,6 @@ function displayMessage() {
 	chatBox.innerHTML = html;
 }
 
-socket.on("connect", () => {
-	console.log(`connected as ${socket.id}`);
-});
-
-socket.on("join", (roomNum) => {
-	room = roomNum;
-});
-
 sendBtn.onclick = () => {
 	if (message.value === "") {
 		alert("Please enter some text!");
@@ -54,6 +46,33 @@ sendBtn.onclick = () => {
 		displayMessage();
 	}
 };
+
+logout.onclick = () => {
+	console.log("logout");
+	socket.disconnect();
+
+	messages = [];
+	displayMessage();
+	socket.connect();
+	socket.emit("ready");
+};
+
+message.addEventListener("keypress", (event) => {
+	event.preventDefault();
+	let key = event.keyCode;
+
+	if (key === 13) {
+		sendBtn.onclick();
+	}
+});
+
+socket.on("connect", () => {
+	console.log(`connected as ${socket.id}`);
+});
+
+socket.on("join", (roomNum) => {
+	room = roomNum;
+});
 
 socket.on("message", (data) => {
 	messages.push(data);
