@@ -50,9 +50,11 @@ function sendMessage(data) {
 }
 
 function listenToAudio() {
+	console.log("TEST");
 	for (const playbackBtn of playbackBtns) {
 		playbackBtn.onclick = () => {
 			const audioID = Number(playbackBtn.value);
+			console.log(audioID);
 			for (const audio of messages) {
 				console.log(audio);
 				if (audio.id === audioID) {
@@ -97,17 +99,19 @@ document.addEventListener("keypress", (event) => {
 	}
 });
 
+let record;
 let toggled = true;
-let record = await recordAudio();
 recordBtn.onclick = async () => {
 	if (toggled) {
+		record = await recordAudio();
 		// Start recording
 		record.start();
 	} else {
 		const audio = await record.stop();
+		console.log(audio);
 
 		const data = {
-			message: record,
+			message: audio,
 			user: socket.id,
 			room: room,
 			isAudio: true,
