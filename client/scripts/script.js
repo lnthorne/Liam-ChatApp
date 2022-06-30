@@ -1,7 +1,10 @@
+import { recordAudio } from "./audio.js";
 const logout = document.getElementById("exit");
 const sendBtn = document.getElementById("submitmsg");
 const message = document.getElementById("usermsg");
 const chatBox = document.getElementById("chatbox");
+const recordBtn = document.getElementById("recordAudio");
+const playbackBtns = document.getElementsByTagName("button");
 
 // IO host
 const socket = io("http://localhost:3000");
@@ -15,17 +18,50 @@ function displayMessage() {
 
 	for (const chat of messages) {
 		if (chat.user === socket.id) {
-			html += `<p align = \'right\'> <b>${chat.user}: </b>${chat.message}</p> <br />`;
-			console.log(html);
+			if (chat.isAudio) {
+				html += `<p align = \'right\'> <b>${chat.user}: </b
+				><button type="button" id="AudioRecording" value="${chat.id}">Audio</button> <br />`;
+			} else {
+				html += `<p align = \'right\'> <b>${chat.user}: </b>${chat.message}</p> <br />`;
+			}
 		} else if (chat.user === "Server") {
 			html += `<p align = \'center\'> <b>${chat.user}: </b>${chat.message}</p> <br />`;
 		} else {
-			html += `<p align = \'left\'> <b>${chat.user}: </b>${chat.message}</p> <br />`;
+			if (chat.isAudio) {
+				html += `<p align = \'left\'> <b>${chat.user}: </b
+				><button type="button" id="AudioRecording" value="${chat.id}">Audio</button> <br />`;
+			} else {
+				html += `<p align = \'left\'> <b>${chat.user}: </b>${chat.message}</p> <br />`;
+			}
 		}
-		console.log(html);
 	}
 
 	chatBox.innerHTML = html;
+}
+
+function sendMessage(data) {
+	messages.push(data);
+	socket.emit("send", data);
+
+	displayMessage();
+	console.log(messages);
+	// Function that will play the audio when user clicks audio button
+	listenToAudio();
+}
+
+function listenToAudio() {
+	for (const playbackBtn of playbackBtns) {
+		playbackBtn.onclick = () => {
+			const audioID = Number(playbackBtn.value);
+			for (const audio of messages) {
+				console.log(audio);
+				if (audio.id === audioID) {
+					console.log(audio.message);
+					audio.message.play();
+				}
+			}
+		};
+	}
 }
 
 sendBtn.onclick = () => {
@@ -37,13 +73,10 @@ sendBtn.onclick = () => {
 			message: message.value,
 			user: socket.id,
 			room: room,
+			isAudio: false,
 		};
-		messages.push(data);
-		socket.emit("send", data);
-
+		sendMessage(data);
 		message.value = "";
-
-		displayMessage();
 	}
 };
 
@@ -57,14 +90,35 @@ logout.onclick = () => {
 	socket.emit("ready");
 };
 
-message.addEventListener("keypress", (event) => {
-	event.preventDefault();
-	let key = event.keyCode;
-
-	if (key === 13) {
+document.addEventListener("keypress", (event) => {
+	if (event.key === "Enter") {
+		event.preventDefault();
 		sendBtn.onclick();
 	}
 });
+
+let toggled = true;
+let record = await recordAudio();
+recordBtn.onclick = async () => {
+	if (toggled) {
+		// Start recording
+		record.start();
+	} else {
+		const audio = await record.stop();
+
+		const data = {
+			message: record,
+			user: socket.id,
+			room: room,
+			isAudio: true,
+			id: Date.now(),
+		};
+		sendMessage(data);
+		audio.play();
+		record = await recordAudio();
+	}
+	toggled = !toggled;
+};
 
 socket.on("connect", () => {
 	console.log(`connected as ${socket.id}`);
@@ -80,3 +134,9 @@ socket.on("message", (data) => {
 });
 
 socket.emit("ready");
+
+for (const i of test) {
+	i.addEventListener("click", () => {
+		console.log(i.value);
+	});
+}

@@ -19,6 +19,7 @@ function listen(io) {
 					message: "Welcome to real time chat room",
 					user: "Server",
 					room: room,
+					isAudio: false,
 				});
 			}
 		});

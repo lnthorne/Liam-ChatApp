@@ -15,8 +15,9 @@
 			<div id="chatbox"></div>
 
 			<form name="message" action="">
-				<input name="usermsg" type="text" id="usermsg" />
+				<input type="text" name="usermsg" id="usermsg" />
 				<input name="submitmsg" type="button" id="submitmsg" value="Send" />
+				<input name="recordAudio" type="button" id="recordAudio" value="Record" />
 			</form>
 		</div>
 
@@ -26,7 +27,7 @@
 			crossorigin="anonymous"
 			referrerpolicy="no-referrer"
 		></script>
-
-		<script src="scripts/script.js"></script>
+		<script type="module" src="scripts/audio.js"></script>
+		<script type="module" src="scripts/script.js"></script>
 	</body>
 </html>
